@@ -1,0 +1,6 @@
+{
+  "name": "Animal Tetris",
+  "description": "Тетрис с очаровательными кубиками-животными, анимацией прыжков при очистке линий и таблицей рекордов по уровням сложности.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
