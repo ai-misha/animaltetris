@@ -216,6 +216,7 @@ private fun ControlCircleButton(
     }
 }
 
+@Composable
 private fun circleButtonColors(
     container: Color,
     content: Color,
