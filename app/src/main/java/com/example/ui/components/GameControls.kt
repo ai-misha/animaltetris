@@ -1,9 +1,6 @@
 package com.example.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,19 +18,25 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowDown
 import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.theme.GameColorScheme
 import com.example.ui.theme.LocalGameColors
 
 @Composable
@@ -49,142 +52,115 @@ fun GameControls(
 ) {
     val colors = LocalGameColors.current
 
-    // Sleek Interface Footer: elevated surface with rounded top (32.dp) and shadow
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = if (colors.isDark) 4.dp else 12.dp,
-                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
-            )
-            .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
-            .background(colors.surface)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+    // Expressive footer: a large-radius tonal sheet anchored to the bottom edge
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = colors.surface,
+        shape = RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp),
+        shadowElevation = if (colors.isDark) 2.dp else 6.dp
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left Group: Hold (Запас) & Soft Drop (Вниз)
+            // Left group: Hold (Запас) & Soft Drop (Вниз)
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Hold Button
                 ControlCircleButton(
                     icon = Icons.Default.SwapHoriz,
                     label = "Запас",
-                    backgroundColor = if (canHold) colors.circleBtnBg else colors.secondaryContainer.copy(alpha = 0.5f),
-                    contentColor = if (canHold) colors.circleBtnContent else colors.textTertiary,
                     enabled = canHold,
                     onClick = onHold,
                     testTag = "hold_button"
                 )
 
-                // Soft Drop (Вниз) Button
                 ControlCircleButton(
                     icon = Icons.Default.ArrowDownward,
                     label = "Вниз",
-                    backgroundColor = colors.circleBtnBg,
-                    contentColor = colors.circleBtnContent,
                     enabled = true,
                     onClick = onSoftDrop,
                     testTag = "soft_drop_button"
                 )
             }
 
-            // Center Group: Left/Right arrows + Drop button
+            // Center group: Left/Right arrows + Drop button
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.width(136.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.width(140.dp)
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Move Left
-                    Box(
-                        modifier = Modifier
-                            .size(46.dp)
-                            .clip(CircleShape)
-                            .background(colors.circleBtnBg)
-                            .clickable(onClick = onMoveLeft)
-                            .testTag("move_left_button"),
-                        contentAlignment = Alignment.Center
+                    FilledTonalIconButton(
+                        onClick = onMoveLeft,
+                        modifier = Modifier.size(52.dp).testTag("move_left_button"),
+                        shape = MaterialTheme.shapes.medium,
+                        colors = circleButtonColors(colors.circleBtnBg, colors.circleBtnContent, colors)
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Влево",
-                            tint = colors.circleBtnContent,
                             modifier = Modifier.size(24.dp)
                         )
                     }
 
-                    // Move Right
-                    Box(
-                        modifier = Modifier
-                            .size(46.dp)
-                            .clip(CircleShape)
-                            .background(colors.circleBtnBg)
-                            .clickable(onClick = onMoveRight)
-                            .testTag("move_right_button"),
-                        contentAlignment = Alignment.Center
+                    FilledTonalIconButton(
+                        onClick = onMoveRight,
+                        modifier = Modifier.size(52.dp).testTag("move_right_button"),
+                        shape = MaterialTheme.shapes.medium,
+                        colors = circleButtonColors(colors.circleBtnBg, colors.circleBtnContent, colors)
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "Вправо",
-                            tint = colors.circleBtnContent,
                             modifier = Modifier.size(24.dp)
                         )
                     }
                 }
 
-                // Drop Button (СБРОС)
-                Box(
+                // Drop button (СБРОС): full-width pill with a bold label
+                Button(
+                    onClick = onHardDrop,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(44.dp)
-                        .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(colors.dropBtnBg)
-                        .clickable(onClick = onHardDrop)
+                        .height(52.dp)
                         .testTag("hard_drop_button"),
-                    contentAlignment = Alignment.Center
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colors.dropBtnBg,
+                        contentColor = colors.dropBtnContent
+                    )
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardDoubleArrowDown,
-                            contentDescription = null,
-                            tint = colors.dropBtnContent,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "СБРОС",
-                            color = colors.dropBtnContent,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.2.sp
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.KeyboardDoubleArrowDown,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "СБРОС",
+                        style = MaterialTheme.typography.labelLarge,
+                        letterSpacing = 1.2.sp
+                    )
                 }
             }
 
-            // Right Group: Rotate button (ПОВОРОТ)
-            Box(
-                modifier = Modifier
-                    .size(62.dp)
-                    .shadow(elevation = 3.dp, shape = RoundedCornerShape(22.dp))
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(colors.rotateBtnBg)
-                    .clickable(onClick = onRotate)
-                    .testTag("rotate_button"),
-                contentAlignment = Alignment.Center
+            // Right group: Rotate (ПОВОРОТ) as the expressive "hero" button
+            FilledIconButton(
+                onClick = onRotate,
+                modifier = Modifier.size(72.dp).testTag("rotate_button"),
+                shape = MaterialTheme.shapes.large,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = colors.rotateBtnBg,
+                    contentColor = colors.rotateBtnContent
+                )
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -193,14 +169,11 @@ fun GameControls(
                     Icon(
                         imageVector = Icons.Default.RotateRight,
                         contentDescription = "Поворот",
-                        tint = colors.rotateBtnContent,
                         modifier = Modifier.size(28.dp)
                     )
                     Text(
                         text = "ПОВОРОТ",
-                        color = colors.rotateBtnContent,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelSmall,
                         letterSpacing = 0.5.sp
                     )
                 }
@@ -213,8 +186,6 @@ fun GameControls(
 private fun ControlCircleButton(
     icon: ImageVector,
     label: String,
-    backgroundColor: Color,
-    contentColor: Color,
     enabled: Boolean,
     onClick: () -> Unit,
     testTag: String
@@ -222,28 +193,37 @@ private fun ControlCircleButton(
     val colors = LocalGameColors.current
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .size(46.dp)
-                .clip(CircleShape)
-                .background(backgroundColor)
-                .clickable(enabled = enabled, onClick = onClick)
-                .testTag(testTag),
-            contentAlignment = Alignment.Center
+        FilledTonalIconButton(
+            onClick = onClick,
+            enabled = enabled,
+            modifier = Modifier.size(52.dp).testTag(testTag),
+            shape = CircleShape,
+            colors = circleButtonColors(colors.circleBtnBg, colors.circleBtnContent, colors)
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = contentColor,
                 modifier = Modifier.size(22.dp)
             )
         }
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = label,
-            fontSize = 10.sp,
+            style = MaterialTheme.typography.labelSmall,
             color = if (enabled) colors.textSecondary else colors.textTertiary,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
+
+@Composable
+private fun circleButtonColors(
+    container: Color,
+    content: Color,
+    colors: GameColorScheme
+) =IconButtonDefaults.filledTonalIconButtonColors(
+    containerColor = container,
+    contentColor = content,
+    disabledContainerColor = colors.secondaryContainer.copy(alpha = 0.5f),
+    disabledContentColor = colors.textTertiary
+)
