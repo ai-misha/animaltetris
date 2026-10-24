@@ -6,7 +6,6 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Leaderboard
@@ -29,14 +27,15 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.VolumeMute
 import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
@@ -65,73 +64,68 @@ fun ScoreHeader(
     val colors = LocalGameColors.current
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 4.dp, vertical = 2.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        // 1. Top Bar: App Icon + Title & Level on left, Score Card on right
+        // 1. Top Bar: App avatar + title & level on left, score tile on right
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // App Avatar & Title
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Purple circular icon with pets
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(if (colors.isDark) colors.primaryContainer else Color(0xFF6750A4)),
-                    contentAlignment = Alignment.Center
+                // Expressive avatar: a bold tonal blob with the animal icon
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(44.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Pets,
-                        contentDescription = "Animal Tetris",
-                        tint = if (colors.isDark) colors.onPrimaryContainer else Color.White,
-                        modifier = Modifier.size(22.dp)
-                    )
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.Pets,
+                            contentDescription = "Animal Tetris",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
 
                 Column {
                     Text(
                         text = "Animal Tetris",
                         color = colors.textPrimary,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        lineHeight = 20.sp
+                        style = MaterialTheme.typography.titleLarge
                     )
                     Text(
                         text = "Уровень ${String.format("%02d", gameState.level)} • Линий: ${gameState.linesCleared}",
                         color = colors.textSecondary,
-                        fontSize = 12.sp
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
 
-            // Sleek M3 Score Card
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(colors.primaryContainer)
-                    .border(
-                        width = 1.dp,
-                        color = if (colors.isDark) colors.outline.copy(alpha = 0.5f) else Color.Transparent,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    .padding(horizontal = 14.dp, vertical = 6.dp),
-                contentAlignment = Alignment.CenterEnd
+            // Score tile: large rounded container with a heavy numeric readout
+            Surface(
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.border(
+                    width = 1.dp,
+                    color = if (colors.isDark) colors.outline.copy(alpha = 0.5f) else Color.Transparent,
+                    shape = MaterialTheme.shapes.large
+                )
             ) {
-                Column(horizontalAlignment = Alignment.End) {
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
                     Text(
                         text = "СЧЁТ",
-                        color = colors.onPrimaryContainer.copy(alpha = 0.8f),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                        style = MaterialTheme.typography.labelSmall,
                         letterSpacing = 1.sp
                     )
                     AnimatedContent(
@@ -143,121 +137,98 @@ fun ScoreHeader(
                     ) { scoreVal ->
                         Text(
                             text = String.format("%,d", scoreVal),
-                            color = colors.onPrimaryContainer,
-                            fontSize = 20.sp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            style = MaterialTheme.typography.headlineSmall,
                             fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Black
                         )
                     }
                 }
             }
         }
 
-        // 2. Second Row: Difficulty Chips + Action Controls (Leaderboard, Sound, Theme, Pause, Restart)
+        // 2. Second Row: Difficulty chips + quick action buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Difficulty Chips
             Row(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Difficulty.entries.forEach { diff ->
-                    val isSelected = diff == gameState.difficulty
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                if (isSelected) {
-                                    if (colors.isDark) colors.primary else Color(0xFF6750A4)
-                                } else colors.secondaryContainer
+                    FilterChip(
+                        selected = diff == gameState.difficulty,
+                        onClick = { onSelectDifficulty(diff) },
+                        label = {
+                            Text(
+                                text = diff.titleRu,
+                                style = MaterialTheme.typography.labelLarge
                             )
-                            .then(
-                                if (!isSelected) {
-                                    Modifier.border(1.dp, colors.outline, RoundedCornerShape(16.dp))
-                                } else Modifier
-                            )
-                            .clickable { onSelectDifficulty(diff) }
-                            .padding(horizontal = 9.dp, vertical = 5.dp)
-                            .testTag("chip_${diff.name.lowercase()}"),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = diff.titleRu,
-                            color = if (isSelected) {
-                                if (colors.isDark) colors.onPrimary else Color.White
-                            } else colors.onSecondaryContainer,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                        },
+                        shape = CircleShape,
+                        modifier = Modifier.testTag("chip_${diff.name.lowercase()}")
+                    )
                 }
             }
 
-            // Quick action icons
             Row(
-                horizontalArrangement = Arrangement.spacedBy(1.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
+                FilledTonalIconButton(
                     onClick = onOpenLeaderboard,
-                    modifier = Modifier.size(32.dp).testTag("leaderboard_button")
+                    modifier = Modifier.size(40.dp).testTag("leaderboard_button")
                 ) {
                     Icon(
                         imageVector = Icons.Default.Leaderboard,
                         contentDescription = "Таблица рекордов",
-                        tint = colors.iconTint,
-                        modifier = Modifier.size(19.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
-                IconButton(
+                FilledTonalIconButton(
                     onClick = onToggleTheme,
-                    modifier = Modifier.size(32.dp).testTag("theme_toggle_button")
+                    modifier = Modifier.size(40.dp).testTag("theme_toggle_button")
                 ) {
                     Icon(
                         imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
                         contentDescription = if (isDarkTheme) "Светлая тема" else "Тёмная тема",
-                        tint = colors.iconTint,
-                        modifier = Modifier.size(19.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
-                IconButton(
+                FilledTonalIconButton(
                     onClick = onToggleMute,
-                    modifier = Modifier.size(32.dp).testTag("sound_toggle_button")
+                    modifier = Modifier.size(40.dp).testTag("sound_toggle_button")
                 ) {
                     Icon(
                         imageVector = if (isMuted) Icons.Default.VolumeMute else Icons.Default.VolumeUp,
                         contentDescription = "Звук",
-                        tint = if (isMuted) colors.textTertiary else colors.iconTint,
-                        modifier = Modifier.size(19.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
-                IconButton(
+                FilledTonalIconButton(
                     onClick = onTogglePause,
-                    modifier = Modifier.size(32.dp).testTag("pause_button")
+                    modifier = Modifier.size(40.dp).testTag("pause_button")
                 ) {
                     Icon(
                         imageVector = if (gameState.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
                         contentDescription = if (gameState.isPaused) "Продолжить" else "Пауза",
-                        tint = colors.iconTint,
-                        modifier = Modifier.size(19.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
-                IconButton(
+                FilledTonalIconButton(
                     onClick = onRestart,
-                    modifier = Modifier.size(32.dp).testTag("restart_button")
+                    modifier = Modifier.size(40.dp).testTag("restart_button")
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = "Перезапустить",
-                        tint = colors.textTertiary,
-                        modifier = Modifier.size(19.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
@@ -276,13 +247,11 @@ fun PiecePreviewBox(
 
     Column(
         modifier = modifier
-            .shadow(if (colors.isDark) 0.dp else 1.dp, RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp))
-            .background(colors.previewBg)
+            .background(colors.previewBg, MaterialTheme.shapes.medium)
             .border(
                 width = 1.dp,
                 color = colors.previewBorder,
-                shape = RoundedCornerShape(16.dp)
+                shape = MaterialTheme.shapes.medium
             )
             .padding(horizontal = 6.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -290,8 +259,7 @@ fun PiecePreviewBox(
     ) {
         Text(
             text = title,
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.labelSmall,
             color = colors.textSecondary,
             textAlign = TextAlign.Center,
             letterSpacing = 0.5.sp
@@ -330,7 +298,7 @@ fun PiecePreviewBox(
                 Text(
                     text = "—",
                     color = colors.textTertiary,
-                    fontSize = 16.sp
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
         }
